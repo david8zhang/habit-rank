@@ -1,9 +1,10 @@
 export interface Props {
+  title: string
   children?: React.ReactNode
 }
 
-const TodoList = ({ children }: Props) => {
-  return <div className='mx-20'>{children}</div>
+const TodoList = ({ title, children }: Props) => {
+  return <div className='overflow-y-auto p-2 max-h-[60vh]'>{children}</div>
 }
 
 export default TodoList
