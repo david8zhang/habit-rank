@@ -5,14 +5,27 @@ export enum TodoDifficulty {
 }
 
 export enum Ranks {
-  BRONZE = 'BRONZE',
-  SILVER = 'SILVER',
-  GOLD = 'GOLD',
-  PLATINUM = 'PLATINUM',
-  DIAMOND = 'DIAMOND',
-  MASTER = 'MASTER',
-  GRANDMASTER = 'GRANDMASTER',
-  GOD = 'GOD',
+  BRONZE_1,
+  BRONZE_2,
+  BRONZE_3,
+  SILVER_1,
+  SILVER_2,
+  SILVER_3,
+  GOLD_1,
+  GOLD_2,
+  GOLD_3,
+  PLATINUM_1,
+  PLATINUM_2,
+  PLATINUM_3,
+  DIAMOND_1,
+  DIAMOND_2,
+  DIAMOND_3,
+  MASTER_1,
+  MASTER_2,
+  MASTER_3,
+  GRANDMASTER_1,
+  GRANDMASTER_2,
+  GRANDMASTER_3,
 }
 
 export interface TodoData {
@@ -54,4 +67,16 @@ export class Constants {
       difficulty: TodoDifficulty.EASY,
     },
   ]
+
+  public static convertRankEnumToName(rank: Ranks) {
+    const rankNames: string[] = []
+    const baseRanks = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grandmaster']
+    const subRanks = ['I', 'II', 'III']
+    baseRanks.forEach((baseRank) => {
+      subRanks.forEach((subRank) => {
+        rankNames.push(`${baseRank} ${subRank}`)
+      })
+    })
+    return rankNames[rank]
+  }
 }
