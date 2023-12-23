@@ -2,19 +2,22 @@
 
 import React from 'react'
 import { TodoDifficulty } from '../constants'
-import { Checkbox } from '@nextui-org/react'
+import { Button, Checkbox } from '@nextui-org/react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 
 export interface Props {
   title: string
   difficulty: TodoDifficulty
-  onTodoChanged: Function
+  onTodoCompleted: (value: boolean) => void
+  onTodoEdit: () => void
 }
 
-const Todo = ({ title, difficulty, onTodoChanged }: Props) => {
+const Todo = ({ title, difficulty, onTodoCompleted, onTodoEdit }: Props) => {
   const [isComplete, setIsComplete] = React.useState(false)
   return (
     <div
-      className={`rounded-md outline mb-5 p-5 flex flex-row ${
+      className={`rounded-md outline mb-5 p-5 flex flex-row items-center ${
         isComplete ? 'bg-slate-900 outline-neutral-400' : ''
       }`}
     >
@@ -24,10 +27,10 @@ const Todo = ({ title, difficulty, onTodoChanged }: Props) => {
         defaultSelected={isComplete}
         onValueChange={(e) => {
           setIsComplete(e)
-          onTodoChanged(e)
+          onTodoCompleted(e)
         }}
       />
-      <div>
+      <div className='flex-1'>
         <p className={`text-2xl font-semibold ${isComplete ? 'line-through text-slate-500' : ''}`}>
           {title}
         </p>
@@ -36,6 +39,14 @@ const Todo = ({ title, difficulty, onTodoChanged }: Props) => {
             {difficulty}
           </p>
         </div>
+      </div>
+      <div
+        className='align-self-center cursor-pointer p-1 box-border'
+        onClick={() => {
+          onTodoEdit()
+        }}
+      >
+        <FontAwesomeIcon icon={faEllipsisV} fontSize='20px' />
       </div>
     </div>
   )
