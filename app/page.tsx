@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import TodoList from './components/todoList'
-import { Ranks, Constants, TodoData, TodoDifficulty } from './constants'
+import { Constants, Ranks, TodoData, TodoDifficulty } from './constants'
 import Todo from './components/todo'
 import { NextUIProvider } from '@nextui-org/react'
 import RankProgress from './components/rankProgress'
@@ -14,7 +14,7 @@ export default function Home() {
   const [createTodoOpen, setCreateTodoOpen] = useState(false)
   const [editTodoOpen, setEditTodoOpen] = useState(false)
   const [rankUpOpen, setRankUpOpen] = useState(false)
-  const [todos, setTodos] = useState<TodoData[]>(Constants.SAMPLE_TODO_DATA)
+  const [todos, setTodos] = useState<TodoData[]>([])
   const [rankProgress, setRankProgress] = useState(0)
   const [currRank, setCurrRank] = useState(Ranks.BRONZE_1)
   const [todoToEdit, setTodoToEdit] = useState<TodoData | null>(null)
@@ -26,8 +26,9 @@ export default function Home() {
     ])
   }
 
-  const completeTodo = (isComplete: boolean) => {
-    let newRankProgress = isComplete ? rankProgress + 20 : rankProgress - 20
+  const completeTodo = (isComplete: boolean, todoDifficulty: TodoDifficulty) => {
+    const expReward = Constants.DIFFICULTY_TO_EXP[todoDifficulty]
+    let newRankProgress = isComplete ? rankProgress + expReward : rankProgress - expReward
     if (newRankProgress >= 100) {
       setRankUpOpen(true)
       setCurrRank(currRank + 1)
@@ -62,10 +63,9 @@ export default function Home() {
         <TodoList title='Incomplete'>
           {todos.map((todo, index) => (
             <Todo
-              onTodoCompleted={completeTodo}
+              onTodoCompleted={(isComplete: boolean) => completeTodo(isComplete, todo.difficulty)}
               onTodoEdit={() => {
                 setTodoToEdit(todo)
-                console.log(todo)
                 setEditTodoOpen(true)
               }}
               title={todo.title}

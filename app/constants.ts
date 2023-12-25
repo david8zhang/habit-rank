@@ -2,6 +2,7 @@ export enum TodoDifficulty {
   EASY = 'Easy',
   MEDIUM = 'Medium',
   HARD = 'Hard',
+  VERY_HARD = 'Very Hard',
 }
 
 export enum Ranks {
@@ -67,6 +68,13 @@ export class Constants {
       difficulty: TodoDifficulty.EASY,
     },
   ]
+
+  public static DIFFICULTY_TO_EXP = {
+    [TodoDifficulty.EASY]: 5,
+    [TodoDifficulty.MEDIUM]: 10,
+    [TodoDifficulty.HARD]: 15,
+    [TodoDifficulty.VERY_HARD]: 20,
+  }
 
   public static convertRankEnumToName(rank: Ranks) {
     const rankNames: string[] = []

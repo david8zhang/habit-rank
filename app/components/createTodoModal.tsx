@@ -57,6 +57,8 @@ const CreateTodoModal = ({ isOpen, onOpenChange, createTodo }: Props) => {
               <Button
                 onPress={() => {
                   createTodo(todoTitle, todoDifficulty)
+                  setTodoTitle('')
+                  setTodoDifficulty('')
                   onClose()
                 }}
               >
