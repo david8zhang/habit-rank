@@ -33,6 +33,7 @@ export interface TodoData {
   id: string
   title: string
   difficulty: TodoDifficulty
+  lastUpdated?: number
 }
 
 export class Constants {
@@ -76,6 +77,8 @@ export class Constants {
     [TodoDifficulty.VERY_HARD]: 20,
   }
 
+  public static MILLIS_IN_DAY = 86400000
+
   public static convertRankEnumToName(rank: Ranks) {
     const rankNames: string[] = []
     const baseRanks = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grandmaster']
@@ -86,5 +89,10 @@ export class Constants {
       })
     })
     return rankNames[rank]
+  }
+
+  public static hasCompleteTodoToday(lastUpdated: number) {
+    const timeSinceLastUpdated = Date.now() - lastUpdated
+    return timeSinceLastUpdated <= Constants.MILLIS_IN_DAY
   }
 }

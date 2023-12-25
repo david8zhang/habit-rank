@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { TodoDifficulty } from '../constants'
+import { Constants, TodoDifficulty } from '../constants'
 import { Button, Checkbox } from '@nextui-org/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons'
@@ -9,12 +9,14 @@ import { faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 export interface Props {
   title: string
   difficulty: TodoDifficulty
+  lastUpdated: number
   onTodoCompleted: (value: boolean) => void
   onTodoEdit: () => void
 }
 
-const Todo = ({ title, difficulty, onTodoCompleted, onTodoEdit }: Props) => {
-  const [isComplete, setIsComplete] = React.useState(false)
+const Todo = ({ title, difficulty, lastUpdated, onTodoCompleted, onTodoEdit }: Props) => {
+  const isTodoComplete = Constants.hasCompleteTodoToday(lastUpdated)
+  const [isComplete, setIsComplete] = React.useState(isTodoComplete)
   return (
     <div
       className={`rounded-md outline mb-5 p-5 flex flex-row items-center ${
