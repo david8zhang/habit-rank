@@ -37,7 +37,7 @@ const EditTodoModal = ({
     setTodoDifficulty(prevTodoDifficulty)
   }, [prevTodoTitle, prevTodoDifficulty])
 
-  if (!todoTitle || !todoDifficulty) {
+  if (!todoDifficulty) {
     return <div></div>
   }
 
@@ -64,7 +64,9 @@ const EditTodoModal = ({
                 value={todoDifficulty}
                 defaultSelectedKeys={[todoDifficulty]}
                 onChange={(e) => {
-                  setTodoDifficulty(e.target.value)
+                  if (e.target.value !== '' && e.target.value !== todoDifficulty) {
+                    setTodoDifficulty(e.target.value)
+                  }
                 }}
               >
                 {Object.values(TodoDifficulty).map((value) => {

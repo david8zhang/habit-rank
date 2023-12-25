@@ -22,6 +22,7 @@ const Todo = ({ title, difficulty, onTodoCompleted, onTodoEdit }: Props) => {
       }`}
     >
       <Checkbox
+        aria-hidden='true'
         size='lg'
         className='mr-2'
         defaultSelected={isComplete}
@@ -41,6 +42,7 @@ const Todo = ({ title, difficulty, onTodoCompleted, onTodoEdit }: Props) => {
         </div>
       </div>
       <div
+        aria-label='Edit'
         className='align-self-center cursor-pointer p-1 box-border'
         onClick={() => {
           onTodoEdit()

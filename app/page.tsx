@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import TodoList from './components/todoList'
 import { Constants, Ranks, TodoData, TodoDifficulty } from './constants'
 import Todo from './components/todo'
@@ -19,11 +19,51 @@ export default function Home() {
   const [currRank, setCurrRank] = useState(Ranks.BRONZE_1)
   const [todoToEdit, setTodoToEdit] = useState<TodoData | null>(null)
 
-  const createTodo = (todoTitle: string, todoDifficulty: TodoDifficulty) => {
-    setTodos([
-      { id: window.crypto.randomUUID(), title: todoTitle, difficulty: todoDifficulty },
-      ...todos,
-    ])
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+      .then((res) => {
+        return res.json()
+      })
+      .then((data) => {
+        const todos = data.todos.map((t: any) => {
+          return {
+            id: t.Id,
+            title: t.Title,
+            difficulty: t.Difficulty,
+            lastUpdated: t.LastUpdated,
+          }
+        })
+        setTodos(todos)
+      })
+  }, [])
+
+  const createTodo = async (todoTitle: string, todoDifficulty: TodoDifficulty) => {
+    const newTodo: TodoData = {
+      id: window.crypto.randomUUID(),
+      title: todoTitle,
+      difficulty: todoDifficulty,
+    }
+    const formBody = Object.keys(newTodo)
+      .map((key: string) => {
+        const encodedKey = encodeURIComponent(key)
+        const encodedValue = encodeURIComponent((newTodo as any)[key])
+        return `${encodedKey}=${encodedValue}`
+      })
+      .join('&')
+
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/new`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: formBody,
+    })
+    setTodos([newTodo, ...todos])
   }
 
   const completeTodo = (isComplete: boolean, todoDifficulty: TodoDifficulty) => {
@@ -41,11 +81,34 @@ export default function Home() {
   }
 
   const editTodo = (newTodoTitle: string, newTodoDifficulty: string) => {
+    const editedTodo = {
+      id: todoToEdit!.id,
+      title: newTodoTitle,
+      difficulty: newTodoDifficulty as TodoDifficulty,
+    }
     const newTodos = todos.map((todo) => {
       if (todoToEdit && todo.id === todoToEdit.id) {
-        return { ...todo, title: newTodoTitle, difficulty: newTodoDifficulty as TodoDifficulty }
+        return {
+          ...todo,
+          ...editedTodo,
+        }
       }
       return todo
+    })
+    const formBody = Object.keys(editedTodo)
+      .map((key: string) => {
+        const encodedKey = encodeURIComponent(key)
+        const encodedValue = encodeURIComponent((editedTodo as any)[key])
+        return `${encodedKey}=${encodedValue}`
+      })
+      .join('&')
+
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/new`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: formBody,
     })
     setTodoToEdit(null)
     setTodos(newTodos)
@@ -76,6 +139,7 @@ export default function Home() {
         </TodoList>
         <div className='flex align-middle justify-center'>
           <button
+            aria-label='add-new'
             onClick={() => setCreateTodoOpen(true)}
             className='p-5 text-2xl hover:bg-slate-900 rounded-md w-[100%]'
           >
