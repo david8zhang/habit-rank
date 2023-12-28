@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import TodoList from './components/todoList'
-import { Constants, Ranks, TodoData, TodoDifficulty } from './constants'
+import { Constants, Ranks, TodoData, TodoDifficulty, TodoStatus } from './utils/constants'
 import Todo from './components/todo'
 import { NextUIProvider } from '@nextui-org/react'
 import RankProgress from './components/rankProgress'
@@ -9,6 +9,7 @@ import RankIcon from './components/rankIcon'
 import CreateTodoModal from './components/createTodoModal'
 import RankUpModal from './components/rankUpModal'
 import EditTodoModal from './components/editTodoModal'
+import { APIHelper } from './utils/apiHelper'
 
 export default function Home() {
   const [createTodoOpen, setCreateTodoOpen] = useState(false)
@@ -20,30 +21,13 @@ export default function Home() {
   const [todoToEdit, setTodoToEdit] = useState<TodoData | null>(null)
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
+    APIHelper.getTodos((todos: TodoData[]) => {
+      setTodos(todos)
     })
-      .then((res) => {
-        return res.json()
-      })
-      .then((data) => {
-        const todos = data.todos
-          .map((t: any) => {
-            return {
-              id: t.Id,
-              title: t.Title,
-              difficulty: t.Difficulty,
-              lastUpdated: t.LastUpdated,
-            }
-          })
-          .sort((a: any, b: any) => {
-            return a.id > b.id ? 1 : -1
-          })
-        setTodos(todos)
-      })
+    APIHelper.getProgression((data: { expTotal: number; rank: Ranks }) => {
+      setCurrRank(data.rank)
+      setRankProgress(data.expTotal)
+    })
   }, [])
 
   const createTodo = async (todoTitle: string, todoDifficulty: TodoDifficulty) => {
@@ -51,60 +35,38 @@ export default function Home() {
       id: window.crypto.randomUUID(),
       title: todoTitle,
       difficulty: todoDifficulty,
+      status: TodoStatus.INCOMPLETE,
     }
-    const formBody = Object.keys(newTodo)
-      .map((key: string) => {
-        const encodedKey = encodeURIComponent(key)
-        const encodedValue = encodeURIComponent((newTodo as any)[key])
-        return `${encodedKey}=${encodedValue}`
-      })
-      .join('&')
-
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/new`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-      body: formBody,
-    })
+    APIHelper.createOrUpdateTodo(newTodo)
     setTodos([newTodo, ...todos])
   }
 
   const completeTodo = (isComplete: boolean, todo: TodoData) => {
     const expReward = Constants.DIFFICULTY_TO_EXP[todo.difficulty]
     let newRankProgress = isComplete ? rankProgress + expReward : rankProgress - expReward
+    let newRank = currRank
     if (newRankProgress >= 100) {
       setRankUpOpen(true)
-      setCurrRank(currRank + 1)
+      newRank++
+      setCurrRank(newRank)
       newRankProgress = 100 % newRankProgress
     } else if (newRankProgress < 0) {
       if (currRank == Ranks.BRONZE_1) {
         newRankProgress = 0
       } else {
-        setCurrRank(Math.max(0, currRank - 1))
+        newRank--
+        setCurrRank(Math.max(0, newRank))
         newRankProgress = 100 + newRankProgress
       }
     }
     setRankProgress(newRankProgress)
     const completePayload: any = {
       id: todo.id,
-      lastUpdated: isComplete ? Date.now() : Date.now() - Constants.MILLIS_IN_DAY * 2,
+      status: isComplete ? TodoStatus.COMPLETE : TodoStatus.INCOMPLETE,
+      newRank,
+      newRankProgress,
     }
-    const formBody = Object.keys(completePayload)
-      .map((key: string) => {
-        const encodedKey = encodeURIComponent(key)
-        const encodedValue = encodeURIComponent(completePayload[key])
-        return `${encodedKey}=${encodedValue}`
-      })
-      .join('&')
-
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/complete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-      body: formBody,
-    })
+    APIHelper.completeTodo(completePayload)
   }
 
   const editTodo = (newTodoTitle: string, newTodoDifficulty: string) => {
@@ -112,6 +74,7 @@ export default function Home() {
       id: todoToEdit!.id,
       title: newTodoTitle,
       difficulty: newTodoDifficulty as TodoDifficulty,
+      status: todoToEdit!.status,
     }
     const newTodos = todos.map((todo) => {
       if (todoToEdit && todo.id === todoToEdit.id) {
@@ -122,21 +85,7 @@ export default function Home() {
       }
       return todo
     })
-    const formBody = Object.keys(editedTodo)
-      .map((key: string) => {
-        const encodedKey = encodeURIComponent(key)
-        const encodedValue = encodeURIComponent((editedTodo as any)[key])
-        return `${encodedKey}=${encodedValue}`
-      })
-      .join('&')
-
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/new`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-      body: formBody,
-    })
+    APIHelper.createOrUpdateTodo(editedTodo)
     setTodoToEdit(null)
     setTodos(newTodos)
   }
@@ -161,9 +110,7 @@ export default function Home() {
                 setTodoToEdit(todo)
                 setEditTodoOpen(true)
               }}
-              lastUpdated={todo.lastUpdated ? todo.lastUpdated : -1}
-              title={todo.title}
-              difficulty={todo.difficulty}
+              todo={todo}
               key={todo.id}
             />
           ))}

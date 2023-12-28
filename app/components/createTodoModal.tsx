@@ -5,14 +5,12 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  useDisclosure,
-  NextUIProvider,
   Input,
   Select,
   SelectItem,
 } from '@nextui-org/react'
 import { useState } from 'react'
-import { TodoDifficulty } from '../constants'
+import { TodoDifficulty } from '../utils/constants'
 
 export interface Props {
   isOpen: boolean

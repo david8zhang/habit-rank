@@ -9,7 +9,7 @@ import {
   Button,
   Input,
 } from '@nextui-org/react'
-import { TodoDifficulty } from '../constants'
+import { TodoDifficulty } from '../utils/constants'
 import { useEffect, useState } from 'react'
 
 export interface Props {

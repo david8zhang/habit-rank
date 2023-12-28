@@ -29,11 +29,17 @@ export enum Ranks {
   GRANDMASTER_3,
 }
 
+export enum TodoStatus {
+  INCOMPLETE,
+  COMPLETE,
+}
+
 export interface TodoData {
   id: string
   title: string
   difficulty: TodoDifficulty
   lastUpdated?: number
+  status: TodoStatus
 }
 
 export class Constants {
@@ -42,31 +48,37 @@ export class Constants {
       id: '1234',
       title: 'Sample Todo',
       difficulty: TodoDifficulty.EASY,
+      status: TodoStatus.INCOMPLETE,
     },
     {
       id: '2345',
       title: 'Sample Todo',
       difficulty: TodoDifficulty.EASY,
+      status: TodoStatus.INCOMPLETE,
     },
     {
       id: '3456',
       title: 'Sample Todo',
       difficulty: TodoDifficulty.EASY,
+      status: TodoStatus.INCOMPLETE,
     },
     {
       id: '4567',
       title: 'Sample Todo',
       difficulty: TodoDifficulty.EASY,
+      status: TodoStatus.INCOMPLETE,
     },
     {
       id: '7890',
       title: 'Sample Todo',
       difficulty: TodoDifficulty.EASY,
+      status: TodoStatus.INCOMPLETE,
     },
     {
       id: '8901',
       title: 'Sample Todo',
       difficulty: TodoDifficulty.EASY,
+      status: TodoStatus.INCOMPLETE,
     },
   ]
 
@@ -91,8 +103,7 @@ export class Constants {
     return rankNames[rank]
   }
 
-  public static hasCompleteTodoToday(lastUpdated: number) {
-    const timeSinceLastUpdated = Date.now() - lastUpdated
-    return timeSinceLastUpdated <= Constants.MILLIS_IN_DAY
+  public static hasCompleteTodoToday(todo: TodoData) {
+    return todo.status == TodoStatus.COMPLETE
   }
 }
