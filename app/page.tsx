@@ -10,23 +10,35 @@ import CreateTodoModal from './components/createTodoModal'
 import RankUpModal from './components/rankUpModal'
 import EditTodoModal from './components/editTodoModal'
 import { APIHelper } from './utils/apiHelper'
+import LostRankModal from './components/lostRankModal'
 
 export default function Home() {
   const [createTodoOpen, setCreateTodoOpen] = useState(false)
   const [editTodoOpen, setEditTodoOpen] = useState(false)
   const [rankUpOpen, setRankUpOpen] = useState(false)
+  const [rankDownOpen, setRankDownOpen] = useState(false)
+  const [progDiff, setProgDiff] = useState({ expDiff: 0, rankDiff: 0 })
   const [todos, setTodos] = useState<TodoData[]>([])
   const [rankProgress, setRankProgress] = useState(0)
   const [currRank, setCurrRank] = useState(Ranks.BRONZE_1)
   const [todoToEdit, setTodoToEdit] = useState<TodoData | null>(null)
 
   useEffect(() => {
-    APIHelper.getTodos((todos: TodoData[]) => {
-      setTodos(todos)
-    })
-    APIHelper.getProgression((data: { expTotal: number; rank: Ranks }) => {
-      setCurrRank(data.rank)
-      setRankProgress(data.expTotal)
+    APIHelper.expireTodos((data: any) => {
+      const { progression } = data
+      setCurrRank(progression.new.rank)
+      setRankProgress(progression.new.expTotal)
+      setTodos(data.todos)
+
+      // Show alert modal if the user lost rank
+      const progDiff = {
+        expDiff: progression.old.expTotal - progression.new.expTotal,
+        rankDiff: progression.old.rank - progression.new.rank,
+      }
+      if (progDiff.expDiff != 0 || progDiff.rankDiff != 0) {
+        setRankDownOpen(true)
+        setProgDiff(progDiff)
+      }
     })
   }, [])
 
@@ -147,7 +159,13 @@ export default function Home() {
           prevTodoTitle={todoToEdit ? todoToEdit.title : ''}
           prevTodoDifficulty={todoToEdit ? todoToEdit.difficulty : ''}
         />
-
+        <LostRankModal
+          isOpen={rankDownOpen}
+          onOpenChange={(e: boolean) => {
+            setRankDownOpen(e)
+          }}
+          progDiff={progDiff}
+        />
         <RankProgress progress={rankProgress} />
       </div>
     </NextUIProvider>

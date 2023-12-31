@@ -1,39 +1,6 @@
 import { TodoData, TodoDifficulty, TodoStatus } from './constants'
 
 export class APIHelper {
-  public static getTodos(onSuccess: Function) {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    })
-      .then((res) => {
-        return res.json()
-      })
-      .then((data) => {
-        const todos = data.todos.sort((a: any, b: any) => {
-          return a.id > b.id ? 1 : -1
-        })
-        onSuccess(todos)
-      })
-  }
-
-  public static getProgression(onSuccess: Function) {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/prog`, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    })
-      .then((res) => {
-        return res.json()
-      })
-      .then((data) => {
-        onSuccess(data)
-      })
-  }
-
   public static createOrUpdateTodo(newTodo: TodoData) {
     const formBody = APIHelper.encodeObjectToURI(newTodo)
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/new`, {
@@ -71,6 +38,18 @@ export class APIHelper {
       },
       body: completeTodoProgressionPayload,
     })
+  }
+
+  public static expireTodos(callback: Function) {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo/expire`, {
+      method: 'POST',
+    })
+      .then((res) => {
+        return res.json()
+      })
+      .then((data) => {
+        callback(data)
+      })
   }
 
   public static encodeObjectToURI(object: any) {
