@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import TodoList from './components/todoList'
 import { Constants, Ranks, TodoData, TodoDifficulty, TodoStatus } from './utils/constants'
 import Todo from './components/todo'
-import { NextUIProvider } from '@nextui-org/react'
+import { NextUIProvider, Spinner } from '@nextui-org/react'
 import RankProgress from './components/rankProgress'
 import RankIcon from './components/rankIcon'
 import CreateTodoModal from './components/createTodoModal'
@@ -13,6 +13,7 @@ import { APIHelper } from './utils/apiHelper'
 import LostRankModal from './components/lostRankModal'
 
 export default function Home() {
+  const [loading, setLoading] = useState(true)
   const [createTodoOpen, setCreateTodoOpen] = useState(false)
   const [editTodoOpen, setEditTodoOpen] = useState(false)
   const [rankUpOpen, setRankUpOpen] = useState(false)
@@ -39,6 +40,7 @@ export default function Home() {
         setRankDownOpen(true)
         setProgDiff(progDiff)
       }
+      setLoading(false)
     })
   }, [])
 
@@ -107,6 +109,17 @@ export default function Home() {
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/todo?id=${todoToEdit!.id}`, {
       method: 'DELETE',
     })
+  }
+
+  if (loading) {
+    return (
+      <NextUIProvider>
+        <div className='flex justify-center items-center flex-col p-10 h-[100vh]'>
+          <Spinner size='lg' />
+          <p className='text-4xl text-center mt-10'>Loading</p>
+        </div>
+      </NextUIProvider>
+    )
   }
 
   return (
